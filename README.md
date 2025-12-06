@@ -29,7 +29,7 @@
     As you may notice you have 3 hearts (❤️❤️❤️). Loose all = loose a game.
 
 - ## installation
-  1. Download a `subo-pistols` archive by pressing `code` button, then `download ZIP`.
+  1. Download a `subo-pistols` archive by pressing `code` button, then [`download ZIP`](https://github.com/Viphase/subo-pistols/archive/refs/heads/main.zip).
   2. Unpack the archive in the folder
   3. Open terminal in this folder and type `pip install -r requirements.txt` _(yeah you need python and pip)_
   4. Run the `main.p`y` file
