@@ -1,6 +1,7 @@
 # **Cowboy-Shootout**
 
 - ## status:
+
   - **`In development 🛠️`**
   - [x] Gun gesture tracking
   - [ ] Arm angle detection
@@ -12,7 +13,7 @@
 
   - A camera-tracked game about wild west shootout between two cowboys.
 
-  ![preview](preview_readme.png)
+  ![preview](./media/image.png/)
 
   > You play against your opponent standing in front of you. When the second will say "SHOOT!" you should decide between two options:
   >
@@ -29,6 +30,7 @@
     As you may notice you have 3 hearts (❤️❤️❤️). Loose all = loose a game.
 
 - ## installation
+
   1. Download a `subo-pistols` archive by pressing `code` button, then [`download ZIP`](https://github.com/Viphase/subo-pistols/archive/refs/heads/main.zip).
   2. Unpack the archive in the folder
   3. Open terminal in this folder and type `pip install -r requirements.txt` _(yeah you need python and pip)_
@@ -36,6 +38,7 @@
   5. Enjoy playing! 🌟
 
 - ## use
+
   ...
 
 - ## examples
