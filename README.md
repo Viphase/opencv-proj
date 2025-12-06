@@ -1,7 +1,5 @@
 # **Cowboy-Shootout**
 
----
-
 - ## status:
   - **`In development 🛠️`**
   - [x] Gun gesture tracking
