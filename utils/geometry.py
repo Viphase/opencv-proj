@@ -131,10 +131,10 @@ class Ray():
             raise TypeError("No input for ray")
         
 class Segment:
-    def __init__(self, a: Point, b: Point, inp=True):
+    def __init__(self, ax: int, ay: int, bx: int, by: int, inp=True):
         if inp:
-            self.A = a
-            self.B = b
+            self.A = Point(ax, ay)
+            self.B = Point(bx, by)
         else:
             raise TypeError("No input for segment")
 

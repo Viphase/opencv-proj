@@ -8,7 +8,7 @@ from utils.geometry import Vector
 
 def finger_dist(first, second, results) -> float:
     if results is None or not results.hand_landmarks:
-        return 0
+        return 0  
 
     lm = results.hand_landmarks[0]
     x1, y1 = lm[first].x, lm[first].y
@@ -35,7 +35,7 @@ def is_pistol(results) -> bool:
             )
             if prev is not None:
                 angle = degrees(acos((current * prev) / (current.dist() * prev.dist())))
-                if 0 <= angle <= 40:
+                if 0 <= angle <= 20:
                     open += 1
                 else:
                     closed += 1
@@ -43,7 +43,7 @@ def is_pistol(results) -> bool:
     return open >= 6 and closed >= 2
 
 
-def arm_angle(results):
+def shot(results) -> bool:
     ...
 
 
@@ -75,7 +75,7 @@ def main():
         if not ret:
             break
 
-        frame, hands, pose = mp_facade.process_frame(frame, debug=True)
+        hands, pose, frame, tracked = mp_facade.process_frame(frame, debug=True)
 
         if is_pistol(hands):
             text = "GUN"
@@ -87,9 +87,8 @@ def main():
         putText(frame, text, (50, 50), FONT_HERSHEY_SIMPLEX, 1, color, 2, LINE_AA)
         imshow("testik", frame)
 
-        key = waitKey(1) & 0xFF
-        if key == 27 or key == ord('q'):
-            mp_facade.close()
+        key = waitKey(1)
+        if key == ord('q'):
             cap.release()
             destroyAllWindows()
             break
