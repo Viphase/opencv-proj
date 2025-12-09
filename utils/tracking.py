@@ -38,7 +38,7 @@ class MediaPipeFacade:
     def process_frame(self, frame, debug: bool = False):
         img = fliplr(frame)
         img = cvtColor(img, COLOR_BGR2RGB)
-        img = resize(img, (1920, 1080))
+
 
         mp_image = Image(image_format=ImageFormat.SRGB, data=img)
 
