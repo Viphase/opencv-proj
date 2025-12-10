@@ -37,9 +37,7 @@ class MediaPipeFacade:
 
     def process_frame(self, frame, debug: bool = False):
         '''
-        ## Returns: 
-        - results_hands
-        - results_pose
+        ## Returns:
         - frame
         - tracked people list
         '''
@@ -77,7 +75,7 @@ class MediaPipeFacade:
                         circle(img, (px, py), 3, (0, 255, 0), -1)
                 for pose in tracked[:2]:
                     img = line(img, (pose.collider.A.x, pose.collider.A.y), (pose.collider.B.x, pose.collider.B.y), (255,255,0), 2)
-        return results_hands, results_pose, cvtColor(img, COLOR_RGB2BGR), tracked
+        return cvtColor(img, COLOR_RGB2BGR), tracked
 
 
 class Human:
@@ -118,7 +116,7 @@ class Human:
         return Segment(head_x, head_y, knees_x, knees_y)
     
     @property
-    def bullet_elbow(self):
+    def bullet(self):
         if self.left_hand:
             elbow = self.pose[13]
         else:
@@ -129,9 +127,9 @@ class Human:
         else:
             hand = self.pose[16]
 
-        elbow_x = int(elbow.x * self.img_shape[1])
-        elbow_y = int(elbow.y * self.img_shape[0])
-        hand_x = int(hand.x * self.img_shape[1])
-        hand_y = int(hand.y * self.img_shape[0])
+        self.elbow_x = int(elbow.x * self.img_shape[1])
+        self.elbow_y = int(elbow.y * self.img_shape[0])
+        self.hand_x = int(hand.x * self.img_shape[1])
+        self.hand_y = int(hand.y * self.img_shape[0])
 
-        return Line(elbow_x, elbow_y, hand_x, hand_y)
+        return Line(self.elbow_x, self.elbow_y, self.hand_x, self.hand_y)

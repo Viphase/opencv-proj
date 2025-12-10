@@ -3,7 +3,7 @@ from cv2 import (VideoCapture, minEnclosingCircle, putText, imshow,
 waitKey, destroyAllWindows, FONT_HERSHEY_SIMPLEX, LINE_AA)
 from math import acos, degrees
 from utils.tracking import MediaPipeFacade
-from utils.geometry import Vector
+from utils.geometry import Vector, crossRS
 
 
 def finger_dist(first, second, results) -> float:
@@ -39,15 +39,21 @@ def is_pistol(hand) -> bool:
     return open >= 6 and closed >= 2
 
 
-def shot(results) -> bool:
-    ...
+def shot(human1, human2):
+    cross1 = crossRS(human1.bullet, human2.collider)
+    cross2 = crossRS(human2.bullet, human1.collider)
+    if cross1 is not None:
+        return (human1, cross1.x, cross1.y)
+    elif cross2 is not None:
+        return (human2, cross2.x, cross2.y)
+    else:
+        return None
 
-
-def is_fist(results, shape) -> bool:
-    if results is None or not results.hand_landmarks:
+def is_fist(hands, shape) -> bool:
+    if hands is None or not hands.hand_landmarks:
         return False
 
-    lm = results.hand_landmarks[0]
+    lm = hands.hand_landmarks[0]
     points = []
 
     for mark in lm:
@@ -71,7 +77,7 @@ def main():
         if not ret:
             break
 
-        hands, pose, frame, tracked = mp_facade.process_frame(frame, debug=True)
+        frame, tracked = mp_facade.process_frame(frame, debug=True)
         labels = []
 
         for i, human in enumerate(tracked):
@@ -87,8 +93,7 @@ def main():
         for text, color in labels:
             putText(frame, text, (50, y), FONT_HERSHEY_SIMPLEX, 0.8, color, 2, LINE_AA)
             y += 40
-
-        imshow("bla bla", frame)
+        imshow("kartinka", frame)
         key = waitKey(1)
         if key == ord('q'):
             cap.release()
