@@ -16,7 +16,7 @@ def finger_dist(first, second, results) -> float:
     return ((x1 - x2)**2 + (y1 - y2)**2)**.5
 
 
-def is_pistol(hand) -> bool:
+def is_pistol(hand, shape) -> bool:
     open = 0
     closed = 0
 
@@ -36,8 +36,26 @@ def is_pistol(hand) -> bool:
                 else:
                     closed += 1
             prev = current
-    return open >= 6 and closed >= 2
 
+    x_l = shape[1]
+    y_l = shape[0]
+    
+    v1  = Vector(hand[0].x * x_l, hand[0].y * y_l, hand[20].x * x_l, hand[20].y * y_l)
+    v2 = Vector(hand[0].x* x_l, hand[0].y * y_l, hand[18].x * x_l, hand[18].y * y_l)
+    v3 = Vector(hand[0].x  * x_l, hand[0].y * y_l, hand[12].x * x_l, hand[12].y * y_l)
+    v4 = Vector(hand[0].x * x_l, hand[0].y * y_l, hand[10].x * x_l, hand[10].y * y_l)
+    v5 = Vector(hand[0].x  * x_l, hand[0].y * y_l, hand[16].x * x_l, hand[16].y * y_l)
+    v6 = Vector(hand[0].x  * x_l, hand[0].y * y_l, hand[14].x * x_l, hand[14].y * y_l) 
+    v7 = Vector(hand[12].x  * x_l, hand[12].y * y_l, hand[8].x * x_l, hand[8].y * y_l) 
+    v8 = Vector(hand[10].x * x_l, hand[10].y * y_l, hand[8].x * x_l, hand[8].y * y_l) 
+    v9 = Vector(hand[4].x * x_l, hand[4].y * y_l, hand[5].x * x_l, hand[5].y * y_l) 
+    v10 = Vector(hand[4].x * x_l, hand[4].y * y_l, hand[9].x * x_l, hand[9].y * y_l) 
+
+    return (v1.dist() - v2.dist() < 0 
+            and v3.dist() - v4.dist() < 0 
+            and v5.dist() - v6.dist() < 0 
+            and v7.dist() - v8.dist() > 0 
+            and v10.dist() - v9.dist() > 0)
 
 def shot(human1, human2):
     cross1 = crossRS(human1.bullet, human2.collider)
@@ -80,8 +98,8 @@ def main():
         frame, tracked = mp_facade.process_frame(frame, debug=True)
         labels = []
 
-        for i, human in enumerate(tracked):
-            if human.right_hand is not None and is_pistol(human.right_hand):
+        for i, human in enumerate(tracked[:2]):
+            if human.right_hand is not None and is_pistol(human.right_hand, frame.shape):
                 text = f"Player {i+1} Right Hand: GUN"
                 color = (0, 255, 0)
             else:

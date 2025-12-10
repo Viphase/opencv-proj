@@ -82,24 +82,22 @@ class Human:
     def __init__(self, hands_results, pose_results, img_shape, i):
         self.pose = pose_results.pose_landmarks[i]
         self.img_shape = img_shape
-        self.left_hand = None
+        self.left_hand = hands_results.handedness[i][0]
         self.right_hand = None
 
-        if hands_results and hands_results.hand_landmarks:
-            self.__assign_hands(hands_results)
+    # def __assign_hands(self, hands_results):
+    #     for hand in hands_results.hand_landmarks:
+    #         wx, wy = hand[0].x, hand[0].y
+    #         rx, ry = self.pose[11].x, self.pose[11].y # это плечи
+    #         lx, ly = self.pose[12].x, self.pose[12].y
 
-    def __assign_hands(self, hands_results):
-        for hand in hands_results.hand_landmarks:
-            wx, wy = hand[0].x, hand[0].y
-            lx, ly = self.pose[11].x, self.pose[11].y # это плечи
-            rx, ry = self.pose[12].x, self.pose[12].y
-
-            left = (wx - lx) ** 2 + (wy - ly) ** 2
-            right = (wx - rx) ** 2 + (wy - ry) ** 2
-            if left < right:
-                self.left_hand = hand
-            else:
-                self.right_hand = hand
+    #         right = (wx - rx) ** 2 + (wy - ry) ** 2
+    #         left = (wx - lx) ** 2 + (wy - ly) ** 2
+    #         if right < left:
+    #             self.right_hand = hand
+    #         else:
+                
+    #             self.left_hand = hand
 
     @property
     def collider(self):
