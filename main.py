@@ -1,9 +1,8 @@
 import numpy as np
 from cv2 import (VideoCapture, minEnclosingCircle, putText, imshow,
 waitKey, destroyAllWindows, FONT_HERSHEY_SIMPLEX, LINE_AA)
-from math import acos, degrees
 from utils.tracking import MediaPipeFacade
-from utils.line import Vector
+from utils.geometry import Vector
 
 
 def is_pistol(results, frame) -> bool:
@@ -19,8 +18,8 @@ def is_pistol(results, frame) -> bool:
     v4 = Vector(lm[0].x, lm[0].y, lm[10].x, lm[10].y)
     v5 = Vector(lm[0].x, lm[0].y, lm[16].x, lm[16].y)
     v6 = Vector(lm[0].x, lm[0].y, lm[14].x, lm[14].y) 
-    v7 = Vector(lm[12].x, lm[12].y, lm[8].x, lm[8].y) 
-    v8 = Vector(lm[10].x, lm[10].y, lm[8].x, lm[8].y) 
+    v7 = Vector(lm[0].x, lm[0].y, lm[8].x, lm[8].y) 
+    v8 = Vector(lm[0].x, lm[0].y, lm[6].x, lm[6].y) 
     v9 = Vector(lm[4].x, lm[4].y, lm[5].x, lm[5].y) 
     v10 = Vector(lm[4].x, lm[4].y, lm[9].x, lm[9].y) 
 
@@ -39,7 +38,7 @@ def is_pistol(results, frame) -> bool:
 
 
 def main():
-    cap = VideoCapture(0)
+    cap = VideoCapture(2)
     mp_facade = MediaPipeFacade()
 
     while True:
