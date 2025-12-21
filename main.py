@@ -18,38 +18,37 @@ def main():
         ret, frame = cap.read()
         if not ret:
             break
-        if frame_number % 10 == 0:
-            frame, hands_results, pose_results = mp_facade.process_frame(frame, debug=True )
-            labels = []
 
-            if pose_results[0] is not None:
-                first_player.left_hand = hands_results[0]
-                first_player.right_hand = hands_results[0]
-                
+        frame, hands_results, pose_results = mp_facade.process_frame(frame, debug=False )
+        labels = []
 
-                first_player.pose = pose_results[0].pose_landmarks[0] if len(pose_results[0].pose_landmarks) else None
-                first_player.shape = frame.shape
+        if pose_results[0] is not None:
+            first_player.left_hand = hands_results[0]
+            first_player.right_hand = hands_results[0]
+            
 
-            if pose_results[1] is not None:
-                second_player.left_hand = hands_results[1]
-                second_player.right_hand = hands_results[1]
-                second_player.pose = pose_results[1].pose_landmarks[0] if pose_results is not None or len(pose_results[1].pose_landmarks) else None
-                second_player.img_shape = frame.shape
+            first_player.pose = pose_results[0].pose_landmarks[0] if len(pose_results[0].pose_landmarks) else None
+            first_player.shape = frame.shape
 
-            if first_player.pose is not None and second_player.pose is not None:
-                result_of_round = round(first_player, second_player, frame.shape)
-                if result_of_round is not None:
-                    for data in result_of_round:
-                        labels.append((data, (0, 0, 255)))
+        if pose_results[1] is not None:
+            second_player.left_hand = hands_results[1]
+            second_player.right_hand = hands_results[1]
+            second_player.pose = pose_results[1].pose_landmarks[0] if pose_results is not None or len(pose_results[1].pose_landmarks) else None
+            second_player.img_shape = frame.shape
 
-            y = 50
-            for text, color in labels:
-                putText(frame, text, (50, y), FONT_HERSHEY_SIMPLEX, 0.8, color, 2, LINE_AA)
-                y += 40
-            imshow("kartinka", frame)
+        if first_player.pose is not None and second_player.pose is not None:
+            result_of_round = round(first_player, second_player, frame.shape)
+            if result_of_round is not None:
+                for data in result_of_round:
+                    labels.append((data, (0, 0, 255)))
 
-        frame_number += 1
-        
+        y = 50
+        for text, color in labels:
+            putText(frame, text, (50, y), FONT_HERSHEY_SIMPLEX, 0.8, color, 2, LINE_AA)
+            y += 40
+        imshow("kartinka", frame)
+
+
         key = waitKey(1)
         if key == ord('q'):
             cap.release()
