@@ -1,9 +1,16 @@
-import sys
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
-from PyQt6.QtGui import QPixmap, QPalette, QBrush, QFontDatabase, QFont
+from PyQt6.QtGui import QPixmap, QPalette, QBrush, QFontDatabase, QFont, QImage
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
+from cv2 import COLOR_BGR2RGB, cvtColor
+import sys
 
+UI_EVENTS = {
+    "start": False,
+    "instruction_yes": False,
+    "instruction_no": False,
+    "continue": False
+}
 
 class GameMenu(QWidget):
     def __init__(self):
@@ -71,11 +78,10 @@ class GameMenu(QWidget):
 
         self.settings_text = QLabel(
             "Cowboy-Shootout — это дуэльная игра.\n\n"
-            "\n"
-            "• Два ковбоя стоят друг напротив друга\n"
-            "• Пистолет — выстрел\n"
-            "• Кулак — защита\n"
-            "• Побеждает самый быстрый\n"
+            "• Два ковбоя должны стоять друг напротив друга\n"
+            "• Пистолет правой рукой — выстрел\n"
+            "• Кулак левой рукой — защита\n"
+            "• Побеждает тот кто попадёт в тело!\n"
         )
         self.settings_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.settings_text.setStyleSheet("""
@@ -109,7 +115,6 @@ class GameMenu(QWidget):
         settings_layout.addStretch()
 
         self.settings_widget.hide()
-
         self.game_widget = QLabel("ИГРА ЗАПУЩЕНА")
         self.game_widget.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.game_widget.setStyleSheet("""
@@ -123,12 +128,11 @@ class GameMenu(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.addWidget(self.menu_widget)
         main_layout.addWidget(self.settings_widget)
-        main_layout.addWidget(self.game_widget)
 
         self.exit_btn.clicked.connect(self.close)
-        self.play_btn.clicked.connect(self.start_game)
-        self.settings_btn.clicked.connect(self.open_settings)
-        self.back_btn.clicked.connect(self.back_to_menu)
+        self.play_btn.clicked.connect(self._on_play)
+        self.settings_btn.clicked.connect(self._on_rules)
+        self.back_btn.clicked.connect(self._on_back)
 
         self.audio = QAudioOutput()
         self.audio.setVolume(0.35)
@@ -142,28 +146,31 @@ class GameMenu(QWidget):
         self.showFullScreen()
         self.set_background(self.menu_bg)
 
-    def loop_music(self, status):
-        if status == QMediaPlayer.MediaStatus.EndOfMedia:
-            self.player.setPosition(0)
-            self.player.play()
-
-    def start_game(self):
+    def _on_play(self):
+        UI_EVENTS["start"] = True
         self.menu_widget.hide()
         self.settings_widget.hide()
         self.game_widget.show()
         self.set_background(self.game_bg)
 
-    def open_settings(self):
+    def _on_rules(self):
+        UI_EVENTS["open_rules"] = True
         self.menu_widget.hide()
         self.settings_widget.show()
         self.game_widget.hide()
         self.set_background(self.menu_bg)
 
-    def back_to_menu(self):
+    def _on_back(self):
+        UI_EVENTS["back_to_menu"] = True
         self.settings_widget.hide()
         self.menu_widget.show()
         self.game_widget.hide()
         self.set_background(self.menu_bg)
+
+    def loop_music(self, status):
+        if status == QMediaPlayer.MediaStatus.EndOfMedia:
+            self.player.setPosition(0)
+            self.player.play()
 
     def set_background(self, path):
         pixmap = QPixmap(path).scaled(
@@ -180,8 +187,47 @@ class GameMenu(QWidget):
         super().resizeEvent(event)
 
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = GameMenu()
-    window.show()
-    sys.exit(app.exec())
+class UIController:
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.window = GameMenu()
+
+        self.camera_label = QLabel(self.window)
+        self.camera_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.camera_label.setStyleSheet("background: black;")
+        self.camera_label.setFixedSize(960, 540)
+
+        self.error_label = QLabel(self.window)
+        self.error_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.error_label.setStyleSheet("""
+            color: red;
+            font-size: 28px;
+            background: rgba(0,0,0,150);
+            padding: 10px;
+        """)
+        self.error_label.hide()
+
+        layout = self.window.layout()
+        layout.addWidget(self.camera_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.error_label, alignment=Qt.AlignmentFlag.AlignBottom)
+
+        self.window.show()
+
+    def draw_frame(self, frame):
+        rgb = cvtColor(frame, COLOR_BGR2RGB)
+        h, w, ch = rgb.shape
+        img = QImage(rgb.data, w, h, ch * w, QImage.Format.Format_RGB888)
+        pix = QPixmap.fromImage(img)
+
+        self.camera_label.setPixmap(
+            pix.scaled(
+                self.camera_label.size(),
+                Qt.AspectRatioMode.KeepAspectRatio))
+        self.app.processEvents()
+
+    def show_error(self, text):
+        if text:
+            self.error_label.setText(text)
+            self.error_label.show()
+        else:
+            self.error_label.hide()

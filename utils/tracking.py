@@ -66,7 +66,7 @@ def split_players(pose_result, hands_result, shape):
     if hands_result and hands_result.hand_landmarks and hands_result.handedness:
         for i, hand in enumerate(hands_result.hand_landmarks):
             classs = hands_result.handedness[i][0]
-            type = classs.category_name
+            type = "Left" if classs.category_name == "Right" else "Right"
 
             cx = sum(lm.x for lm in hand) / len(hand) * shape[1]
 

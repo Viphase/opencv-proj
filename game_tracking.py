@@ -51,46 +51,16 @@ def is_shield(hand, shape) -> bool:
     return (2 * r / ws) < 1.6
 
 
-def fast_hit(ray, collider: Segment) -> bool:
-    if ray is None or collider is None:
-        return False
-
-    (x1, y1), (x2, y2) = collider.start, collider.end
-    px, py = ray.point
-
-    return (
-        min(x1, x2) <= px <= max(x1, x2) and
-        min(y1, y2) <= py <= max(y1, y2)
-    )
-
-
-def round(first, second, shape):
-
-    if not (first.ready and second.ready):
-        return "Not enough data"
-
-    first.update_state(shape)
-    second.update_state(shape)
-
-    if first.try_shoot(second):
-        return "First won", f"First: {first.state}", f"Second: {second.state}"
-
-    if second.try_shoot(first):
-        return "Second won", f"First: {first.state}", f"Second: {second.state}"
-
-    return None
-
-
 def debugf(frame, player1, player2):
     if player1.collider:
         start = (int(player1.collider.start.x), int(player1.collider.start.y))
         end   = (int(player1.collider.end.x), int(player1.collider.end.y))
-        line(frame, start, end, (255,0,0), 2)
+        line(frame, start, end, (255,70,0), 2)
 
     if player2.collider:
         start = (int(player2.collider.start.x), int(player2.collider.start.y))
         end = (int(player2.collider.end.x), int(player2.collider.end.y))
-        line(frame, start, end, (0,0,255), 2)
+        line(frame, start, end, (0,70,255), 2)
 
     putText(frame, f"P1: {player1.state}", (50,50), FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
     putText(frame, f"P2: {player2.state}", (50,80), FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
@@ -102,6 +72,8 @@ def debugf(frame, player1, player2):
     
     debug_tag(frame, player1, 1)
     debug_tag(frame, player2, 2)
+
+    line(frame, (frame.shape[1]//2, 0), (frame.shape[1]//2, frame.shape[0]), (0, 255, 0), 4)
 
 
 def debug_tag(frame, player, index):
@@ -203,14 +175,13 @@ class Human:
         except:
             return None
 
-    def try_shoot(self, enemy) -> bool:
+    def shoot(self, enemy) -> bool:
         if self.state != "Gun" or self._shot:
             return False
-
         self._shot = True
 
-        if not fast_hit(self.bullet, enemy.collider):
-            return False
+        if cross_ray_segment(self.bullet, enemy.collider):
+            return True
 
         if not cross_ray_segment(self.bullet, enemy.collider):
             return False
