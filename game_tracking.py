@@ -53,13 +53,13 @@ def is_shield(hand, shape) -> bool:
 
 def debugf(frame, player1, player2):
     if player1.collider:
-        start = (int(player1.collider.start.x), int(player1.collider.start.y))
-        end   = (int(player1.collider.end.x), int(player1.collider.end.y))
+        start = (int(player1.collider[0].start.x), int(player1.collider[0].start.y))
+        end =                                                                                (int(player1.collider[2].end.x), int(player1.collider[2].end.y))
         line(frame, start, end, (255,70,0), 2)
 
     if player2.collider:
-        start = (int(player2.collider.start.x), int(player2.collider.start.y))
-        end = (int(player2.collider.end.x), int(player2.collider.end.y))
+        start = (int(player2.collider[0].start.x), int(player2.collider[0].start.y))
+        end = (int(player2.collider[2].end.x), int(player2.collider[2].end.y))
         line(frame, start, end, (0,70,255), 2)
 
     putText(frame, f"P1: {player1.state}", (50,50), FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
@@ -102,6 +102,12 @@ class Human:
         self.won = 0
         self.state = "Nothing"
         self._shot = False
+
+        self.safe = {
+            "head": False,
+            "Body": False,
+            "Legs": False,
+        }
 
     @property
     def ready(self):
@@ -146,11 +152,23 @@ class Human:
         head = (
             int(nose.x * self.img_shape[1]),
             int(nose.y * self.img_shape[0] - 4 * (nose.y - neck.y) * self.img_shape[0]))
+        
+        neck = (
+            int(neck.x * self.img_shape[1]),
+            int(neck.y * self.img_shape[0])
+        )
+
+        hip1, hip2 = self.pose[24], self.pose[23]
+
+        hip = (
+            int((hip1.x + hip2.x) * 0.5 * self.img_shape[1]),
+            int((hip1.y + hip2.y) * 0.5 * self.img_shape[0])
+        )
 
         knees = (
             int((k1.x + k2.x) * 0.5 * self.img_shape[1]),
             int((k1.y + k2.y) * 0.5 * self.img_shape[0]))
-        return Segment(head, knees)
+        return Segment(head, neck), Segment((neck[0], neck[1] - 1), hip), Segment((hip[0], hip[1] - 1), knees)
 
     @property
     def bullet(self):
@@ -168,28 +186,48 @@ class Human:
 
     @property
     def shield(self):
-        try:
-            x = self.pose[16].x *  self.image_shape[1]
-            y = self.pose[16].y *  self.image_shape[0]
-            return Segment((x, y - 50), (x, y + 50))
-        except:
-            return None
+        x = self.pose[16].x *  self.image_shape[1]
+        y = self.pose[16].y *  self.image_shape[0]
+        
+        segments = self.collider
+        
+        if min(segments[0].start.y, segments[0].end.y) <= y <= max(segments[0].start.y, segments[0].end.y):
+            self.safe["head"] = True
+        elif min(segments[1].start.y, segments[1].end.y) <= y <= max(segments[1].start.y, segments[1].end.y):
+            self.safe["body"] = True
+        elif min(segments[2].start.y, segments[2].end.y) <= y <= max(segments[2].start.y, segments[2].end.y):
+            self.safe["legs"] = True
 
     def shoot(self, enemy) -> bool:
         if self.state != "Gun" or self._shot:
             return False
         self._shot = True
 
-        if cross_ray_segment(self.bullet, enemy.collider):
-            return True
+        if enemy.state == "Shield":
+            enemy.shield
 
-        if not cross_ray_segment(self.bullet, enemy.collider):
+        if cross_ray_segment(self.bullet, enemy.collider[0]):
+            if enemy.safe['head']:
+                return False
+            else:
+                self.won += 1
+                enemy.hp -= 1.5
+                return True
+            
+        elif cross_ray_segment(self.bullet, enemy.collider[1]):
+            if enemy.safe['body']:
+                return False
+            else:
+                self.won += 1
+                enemy.hp -= 1
+                return True
+        elif cross_ray_segment(self.bullet, enemy.collider[2]):
+            if enemy.safe['legs']:
+                return False
+            else:
+                self.won += 1
+                enemy.hp -= .5
+                return True
+        else:
             return False
 
-        if enemy.state == "Shield":
-            if cross_ray_segment(self.bullet, enemy.shield):
-                return False
-
-        self.won += 1
-        enemy.hp -= 1
-        return True
