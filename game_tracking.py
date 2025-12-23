@@ -52,15 +52,22 @@ def is_shield(hand, shape) -> bool:
 
 
 def debugf(frame, player1, player2):
+    colors = [(0, 0, 255), (0, 255, 0), (255, 0, 0)]
+
     if player1.collider:
-        start = (int(player1.collider[0].start.x), int(player1.collider[0].start.y))
-        end =                                                                                (int(player1.collider[2].end.x), int(player1.collider[2].end.y))
-        line(frame, start, end, (255,70,0), 2)
+        
+        for i, _ in enumerate(player1.collider):
+            start = (int(player1.collider[0].start.x), int(player1.collider[0].start.y))
+            end = (int(player1.collider[2].end.x), int(player1.collider[2].end.y))
+            c = colors[i] if i < len(colors) else colors[-1]
+            line(frame, start, end, c, 6)
 
     if player2.collider:
-        start = (int(player2.collider[0].start.x), int(player2.collider[0].start.y))
-        end = (int(player2.collider[2].end.x), int(player2.collider[2].end.y))
-        line(frame, start, end, (0,70,255), 2)
+        for i, _ in enumerate(player2.collider):
+            start = (int(player2.collider[0].start.x), int(player2.collider[0].start.y))
+            end = (int(player2.collider[2].end.x), int(player2.collider[2].end.y))
+            c = colors[i] if i < len(colors) else colors[-1]
+            line(frame, start, end, c, 6)
 
     putText(frame, f"P1: {player1.state}", (50,50), FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
     putText(frame, f"P2: {player2.state}", (50,80), FONT_HERSHEY_SIMPLEX, 0.7, (255,255,255), 2)
@@ -105,17 +112,17 @@ class Human:
 
         self.safe = {
             "head": False,
-            "Body": False,
-            "Legs": False,
+            "body": False,
+            "legs": False,
         }
 
     @property
-    def ready(self):
+    def in_ready_pos(self):
         return (
             self.pose is not None and
             self.left_hand is not None and
             self.right_hand is not None and
-            len(self.pose) >= 33
+            len(self.pose) >= 26
         )
 
     @property

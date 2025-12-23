@@ -130,7 +130,10 @@ class GameMenu(QWidget):
             "- Два игрока стоят напротив камеры\n"
             "- Правая рука пистолет - выстрел\n"
             "- Левая рука кулак - щит\n"
-            "- Побеждает тот, кто попадёт первым\n"
+            "- У ковбоя есть 3 части тела - голова, тело и ноги\n"
+            "  тебе нужно угадать куда выстрелить а где защититься\n"
+            "- После нажатия кнопки продолжить, будет обратный отсчёт\n"
+            "- Когда отсчёт пройдет - стреляй или защищайся!\n"
         )
         self.rules_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.rules_text.setStyleSheet("""
@@ -184,7 +187,7 @@ class GameMenu(QWidget):
         main_layout.addWidget(self.rules_widget)
         main_layout.addWidget(self.game_widget)
 
-        self.exit_btn.clicked.connect(self.close)
+        self.exit_btn.clicked.connect(sys.exit(0))
         self.play_btn.clicked.connect(lambda: UI_EVENTS.update({"start": True}))
         self.continue_btn.clicked.connect(lambda: UI_EVENTS.update({"continue_game": True}))
 

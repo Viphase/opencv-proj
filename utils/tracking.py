@@ -25,7 +25,7 @@ class MediaPipeFacade:
     def process_frame(self, frame, debug=False):
         timestamp = int(time.time() * 1000)
         img = cvtColor(frame, COLOR_BGR2RGB)
-        mp_img = Image(image_format=ImageFormat.SRGB, data=img)
+        mp_img = Image(image_format=ImageFormat.SRGB, data=img.copy())
 
         hands = self.hands.detect_for_video(mp_img, timestamp)
         pose  = self.pose.detect_for_video(mp_img, timestamp)

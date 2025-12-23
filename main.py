@@ -5,20 +5,24 @@ from ui import UI_EVENTS, UIController
 
 GAME = {
     "state": "menu",#menu, ask_rules, rules, check, countdown, round
+    "num_people": 0,
     "countdown": 3,
     "error": None
 }
 ui = UIController()
 
 def check_players(first, second):
-    if first.pose is None or second.pose is None:
-        return "Нужно два игрока"
+    if GAME.get("num_people", 0) != 2:
+        if GAME.get("num_people", 0) == 0:
+            return "Нужно только два игрока!"
+        else:
+            return "В кадре должно быть ровно 2 игрока!"
 
-    if not first.ready or not second.ready:
-        return "Руки или позы не видны"
+    if not first.in_ready_pos or not second.in_ready_pos:
+        return "Руки или колени не видны!"
 
     if first.state != "Nothing" or second.state != "Nothing":
-        return "Уберите руки (ничего не показывайте)"
+        return "Не показывайте жесты!"
 
     return None
 
@@ -53,6 +57,12 @@ def main():
         frame_number += 1
 
         split = split_players(pose_results, hands_results, frame.shape)
+
+        if pose_results and pose_results.pose_landmarks:
+            GAME["num_people"] = len(pose_results.pose_landmarks)
+        else:
+            GAME["num_people"] = 0
+        
         if split:
             left_pose, right_pose, left_hands, right_hands = split
 
