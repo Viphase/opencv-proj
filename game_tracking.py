@@ -11,7 +11,6 @@ def finger_dist(a, b, hand, shape) -> float:
     x2, y2 = hand[b].x * shape[1], hand[b].y * shape[0]
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
-
 def is_pistol(hand, shape) -> bool:
     v1  = finger_dist(0, 20, hand, shape)
     v2  = finger_dist(0, 18, hand, shape)
@@ -32,7 +31,6 @@ def is_pistol(hand, shape) -> bool:
         v10 - v9 > 0
     )
 
-
 def is_shield(hand, shape) -> bool:
     if hand is None:
         return False
@@ -49,7 +47,6 @@ def is_shield(hand, shape) -> bool:
     _, r = minEnclosingCircle(points)
 
     return (2 * r / ws) < 1.6
-
 
 def debugf(frame, player1, player2):
     colors = [(0, 0, 255), (0, 255, 0), (255, 0, 0)]
@@ -82,7 +79,6 @@ def debugf(frame, player1, player2):
 
     line(frame, (frame.shape[1]//2, 0), (frame.shape[1]//2, frame.shape[0]), (0, 255, 0), 4)
 
-
 def debug_tag(frame, player, index):
     if player.pose is None or len(player.pose) < 1:
         return
@@ -97,7 +93,6 @@ def debug_tag(frame, player, index):
     rectangle(frame, (x - 2, y - h - 2), (x + w + 2, y + 2), (50, 50, 50), -1)
     putText(frame, text, (x, y), FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
-
 class Human:
     def __init__(self, hands_results, pose_results, img_shape):
         self.pose = pose_results
@@ -106,7 +101,6 @@ class Human:
         self.right_hand = hands_results
 
         self.hp = 3
-        self.won = 0
         self.state = "Nothing"
         self._shot = False
 
@@ -128,6 +122,7 @@ class Human:
     @property
     def left_hand(self):
         return self._left_hand
+    
     @left_hand.setter
     def left_hand(self, hand):
         self._left_hand = hand
@@ -135,6 +130,7 @@ class Human:
     @property
     def right_hand(self):
         return self._right_hand
+    
     @right_hand.setter
     def right_hand(self, hand):
         self._right_hand = hand
@@ -199,14 +195,18 @@ class Human:
         
         if min(segments[0].start.y, segments[0].end.y) <= y <= max(segments[0].start.y, segments[0].end.y):
             self.safe["head"] = True
+            self.safe["body"] = False
+            self.safe["legs"] = False 
         elif min(segments[1].start.y, segments[1].end.y) <= y <= max(segments[1].start.y, segments[1].end.y):
+            self.safe["head"] = False
             self.safe["body"] = True
+            self.safe["legs"] = False
         elif min(segments[2].start.y, segments[2].end.y) <= y <= max(segments[2].start.y, segments[2].end.y):
+            self.safe["head"] = False
+            self.safe["body"] = False
             self.safe["legs"] = True
 
     def shoot(self, enemy) -> bool:
-        if self.state != "Gun" or self._shot:
-            return False
         self._shot = True
 
         if enemy.state == "Shield":
@@ -214,26 +214,51 @@ class Human:
 
         if cross_ray_segment(self.bullet, enemy.collider[0]):
             if enemy.safe['head']:
-                return False
+                return 'Second defended'
             else:
-                self.won += 1
                 enemy.hp -= 1.5
-                return True
+                return 'First headshot'
             
         elif cross_ray_segment(self.bullet, enemy.collider[1]):
             if enemy.safe['body']:
-                return False
+                return 'Second defended'
             else:
-                self.won += 1
                 enemy.hp -= 1
-                return True
+                return 'First bodyshot'
+            
         elif cross_ray_segment(self.bullet, enemy.collider[2]):
             if enemy.safe['legs']:
-                return False
+                return 'Second defended'
             else:
-                self.won += 1
                 enemy.hp -= .5
-                return True
+                return 'First legshot'
         else:
-            return False
+            return 'First missed'
 
+
+def round(first_player, second_player, shape):
+
+    if first_player.right_hand is not None and is_pistol(first_player.right_hand, shape):
+        first_player.state = "Gun"
+    elif first_player.left_hand is not None and is_shield(first_player.left_hand, shape):
+        first_player.state = "Shield"
+    else:
+        first_player.state = "Nothing"
+
+    if second_player.right_hand is not None and is_pistol(second_player.right_hand, shape):
+        second_player.state = "Gun"
+    elif second_player.left_hand is not None and is_shield(second_player.left_hand, shape):
+        second_player.state = "Shield"
+    else:
+        second_player.state = "Nothing"
+
+    if first_player.state == "Gun" and second_player.state != 'Gun':
+        result = first_player.shoot(second_player)
+    elif first_player.state != "Gun" and second_player.state == "Gun":
+        result = second_player.shoot(first_player)
+    elif first_player.state == "Gun" and second_player.state == 'Gun':
+        result = first_player.shoot(second_player) + "\n" + second_player.shoot(first_player)
+    else:
+        result = "No shot"
+    
+    return result
