@@ -43,6 +43,6 @@
 
 - ## examples
   * Example 1:
-  [![Example 1](ui/exmpl1.png)]
+  ![Example 1](ui/exmpl1.png)
   * Example 2:
-  [![Example](ui/exmpl2.png)]
+  ![Example](ui/exmpl2.png)
