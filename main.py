@@ -22,7 +22,7 @@ def check_players(first, second):
             return "В кадре должно быть ровно 2 игрока!"
 
     if not first.in_ready_pos or not second.in_ready_pos:
-        return "Колени не видны! (Могут быть не в своей половине кадра!)"
+        return "Все руки или колени не видны! (Могут быть не в своей половине кадра!)"
 
     if first.state != "Nothing" or second.state != "Nothing":
         return "Не показывайте жесты!"
@@ -156,6 +156,7 @@ def main():
                     countdown_time = current_time
 
                 if GAME["countdown"] < 0:
+                    ui.window.play_go_sound()
                     GAME["state"] = "round"
                     reaction_time = time.time()
 
@@ -163,7 +164,7 @@ def main():
             ui.show_game()
             ui.update_hp(int(first_player.hp), int(second_player.hp))
             current_time = time.time()
-            if current_time - reaction_time >= 1.5:
+            if current_time - reaction_time >= 2.5:
                 result = round(first_player, second_player, frame.shape)
                 GAME["round_result"] = result
                 GAME["state"] = "result"

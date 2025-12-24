@@ -197,7 +197,13 @@ class GameMenu(QWidget):
         self._set_background(self.menu_bg)
 
         self.audio = QAudioOutput()
-        self.audio.setVolume(0.35)
+        self.audio.setVolume(0.20)
+
+        self.go_audio = QAudioOutput()
+        self.go_audio.setVolume(1.0)
+        self.go_player = QMediaPlayer()
+        self.go_player.setAudioOutput(self.go_audio)
+        self.go_player.setSource(QUrl.fromLocalFile("./ui/go_sound.mp3"))
 
         self.player = QMediaPlayer()
         self.player.setAudioOutput(self.audio)
@@ -246,6 +252,10 @@ class GameMenu(QWidget):
     def update_background(self):
         bg = self.game_bg if self._current_state == 'game' else self.menu_bg
         self._set_background(bg)
+    
+    def play_go_sound(self):
+        self.go_player.setPosition(0)
+        self.go_player.play()
 
 
 class UIController:
